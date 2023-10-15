@@ -160,10 +160,96 @@ ggplot(excellent_data, aes(x = year, y = avg_value, group = locationabbr, color 
 ny_data <- brfss_smart2010 |>
   filter(locationabbr == "NY" & year %in% c(2006, 2010))
 
-ggplot(ny_data, aes(x= response, y = data_value))+
+ggplot(ny_data, aes(x= response, y = data_value, fill = response))+
   geom_boxplot()+
   labs(title="Data value for responses in NY", x="Responses", y="Data Value") +
   facet_wrap(~year)
+
+```
+
+
+
+#### Problem 3
+
+```{r p3 load data}
+demographic_data <- read_csv("data/nhanes_covar.csv", skip = 4)
+accelerometer_data <- read_csv("data/nhanes_accel.csv")
+```
+```{r p3 clean & merge}
+demographic_clean = demographic_data |> 
+  janitor::clean_names() |> 
+  drop_na() |>
+  filter(age >= 21) |> 
+  mutate (sex = ifelse(sex == 1, "Male", "Female")) |>
+  mutate (education = factor(education, levels = 1:3, labels = c("Less than high school", "High school equivalent", "More than high school"), ordered = TRUE)) |>
+  mutate(sex = factor(sex),
+         education = factor(education))
+
+accelerometer_clean = accelerometer_data |>
+  rename("seqn" = "SEQN") 
+  
+accelerometer_pivot = accelerometer_clean |>
+  pivot_longer( 
+    min1:min1440,
+    names_to = "min_number",
+    values_to = "mims_values")
+
+mims_merge =  
+  left_join(demographic_clean, accelerometer_clean, by = "seqn")
+
+mims_pivot = 
+  left_join(demographic_clean, accelerometer_pivot, by = "seqn")
+```
+
+#### Table of men and women in each education category
+```{r p3 task 1 }
+table_education_sex = mims_merge |>
+  group_by(education, sex) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = sex, values_from = count)
+print(table_education_sex)
+```
+
+#### Visualization of age distributions
+```{r p3 task 2}
+ggplot(mims_merge, aes(x = education, y = age, fill = sex)) +
+  geom_boxplot() +
+  labs(title = "Age Distribution by Education Level and Sex",
+       x = "Education Level",
+       y = "Age",
+       fill = "Sex")
+
+```
+
+```{r p3 task 3}
+
+total_mims = mims_pivot |> 
+  group_by(seqn, age, sex, education) |> 
+  summarise(total_activity = sum(mims_values) )
+
+ggplot(total_mims, aes(x = age, y = total_activity, color = sex)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~ education) +
+  labs(title = "Total Activity",
+       x = "Age",
+       y = "Total Activity by Education Level and Age",
+       color = "Sex"
+       ) 
+
+```
+
+```{r p3 task 4}
+daily_activity = mims_pivot |>
+  mutate(across(starts_with("min"), ~ as.numeric(str_extract(., "\\d+")))) |>
+  group_by(min_number, sex, education) |>
+  arrange(min_number) |>
+  summarise(avg_activity = mean(mims_values))
+   
+ggplot(daily_activity, aes(x = min_number, y = avg_activity, color = sex)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap( ~ education)
 
 ```
 
