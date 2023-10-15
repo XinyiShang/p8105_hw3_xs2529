@@ -231,9 +231,9 @@ ggplot(total_mims, aes(x = age, y = total_activity, color = sex)) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~ education) +
-  labs(title = "Total Activity",
+  labs(title = "Total Activity over the Day by Education Level and Age",
        x = "Age",
-       y = "Total Activity by Education Level and Age",
+       y = "Total Activity",
        color = "Sex"
        ) 
 
@@ -247,9 +247,14 @@ daily_activity = mims_pivot |>
   summarise(avg_activity = mean(mims_values))
    
 ggplot(daily_activity, aes(x = min_number, y = avg_activity, color = sex)) +
-  geom_point() +
-  geom_smooth() +
-  facet_wrap( ~ education)
+  geom_point(alpha = 0.25) +
+  geom_smooth(linetype = "solid", size = 1.5) +
+  facet_wrap( ~ education) +
+  labs(title = "Average Daily Activity by Education Level and Age",
+       x = "Time (min) ",
+       y = "Average Activity",
+       color = "Sex"
+       ) 
 
 ```
 
