@@ -100,7 +100,7 @@ instacart |>
 
 #### Read in the data
 
-```{r load data}
+```{r p2 load data}
 data("brfss_smart2010")
 
 brfss_smart2010 = 
@@ -111,33 +111,37 @@ brfss_smart2010 =
 
 #### Data Cleaning
 
-```{r data cleaning}
+```{r p3 data cleaning}
 brfss_smart2010 = brfss_smart2010 |>
   janitor::clean_names() |> 
   filter(topic == "Overall Health" & response %in% c("Excellent", "Very good", "Good", "Fair", "Poor")) |>
-  mutate(response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))) |>
-  arrange(response)
+  mutate(response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))) |> #change response to factor levels
+  arrange(response) #arrange by response
 ```
 
-#### Task 1
+#### States were observed at 7 or more locations in 2002 and 2010
 
 ```{r task 1}
 #States in 2002
 states_2002 <- brfss_smart2010 |>
   filter(year == 2002) |>
   group_by(locationabbr) |>
-  summarize(locationdesc = n()) |>
-  filter(locationdesc >= 7)
+  summarize(locationNum = n_distinct(locationdesc)) |>
+  filter(locationNum >= 7)
 
 # States in 2010
 states_2010 <- brfss_smart2010 |>
   filter(year == 2010) |>
   group_by(locationabbr) |>
-  summarize(locationdesc = n()) |>
-  filter(locationdesc >= 7)
+  summarize(locationNum = n_distinct(locationdesc)) |>
+  filter(locationNum >= 7)
 ```
 
-#### Task 2
+In 2002, 7 or more locations were observed in `r pull(states_2002, locationabbr)`. 
+
+In 2010, `r pull(states_2010, locationabbr)` observed 7 or more locations. 
+
+#### Make a “spaghetti” plot of this average value over time within a state
 
 ```{r task 2}
 excellent_data <- brfss_smart2010 |>
@@ -154,7 +158,12 @@ ggplot(excellent_data, aes(x = year, y = avg_value, group = locationabbr, color 
   theme(legend.position = "right")
 ```
 
-#### Task 3
+This figure shows the average `data_value` with the `excellent` response within state across time. It shows the average values are fluctuating between years for each state. 
+ 
+
+
+#### Distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State in 2006 and 2010
+
 ```{r task 3}
 
 ny_data <- brfss_smart2010 |>
@@ -166,6 +175,8 @@ ggplot(ny_data, aes(x= response, y = data_value, fill = response))+
   facet_wrap(~year)
 
 ```
+
+This figure displays the `data value` categorized by responses for the years 2006 and 2010. The distributions in 2006 and 2010 are highly alike. Overall, the highest `data value` were achieved for responses `Good` and `Very Good` in both 2006 and 2010. Conversely, the lowest `data value` are associated with the `Poor` response.
 
 
 
