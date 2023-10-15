@@ -127,7 +127,7 @@ states_2002 <- brfss_smart2010 |>
   filter(year == 2002) |>
   group_by(locationabbr) |>
   summarize(locationNum = n_distinct(locationdesc)) |>
-  filter(locationNum >= 7)
+  filter(locationNum >= 7) #filter out 7 or more locations
 
 # States in 2010
 states_2010 <- brfss_smart2010 |>
@@ -191,19 +191,19 @@ demographic_clean = demographic_data |>
   janitor::clean_names() |> 
   drop_na() |>
   filter(age >= 21) |> 
-  mutate (sex = ifelse(sex == 1, "Male", "Female")) |>
-  mutate (education = factor(education, levels = 1:3, labels = c("Less than high school", "High school equivalent", "More than high school"), ordered = TRUE)) |>
+  mutate (sex = ifelse(sex == 1, "Male", "Female")) |> #change sex to meaningful values
+  mutate (education = factor(education, levels = 1:3, labels = c("Less than high school", "High school equivalent", "More than high school"), ordered = TRUE)) |> #change education to factor levels
   mutate(sex = factor(sex),
          education = factor(education))
 
 accelerometer_clean = accelerometer_data |>
-  rename("seqn" = "SEQN") 
+  rename("seqn" = "SEQN") #rename for merge
   
 accelerometer_pivot = accelerometer_clean |>
   pivot_longer( 
     min1:min1440,
     names_to = "min_number",
-    values_to = "mims_values")
+    values_to = "mims_values") #perform pivot for analysis
 
 mims_merge =  
   left_join(demographic_clean, accelerometer_clean, by = "seqn")
@@ -221,6 +221,8 @@ table_education_sex = mims_merge |>
 print(table_education_sex)
 ```
 
+Both male and female have the highest amount of people who get `more than high school education`. 
+
 #### Visualization of age distributions
 ```{r p3 task 2}
 ggplot(mims_merge, aes(x = education, y = age, fill = sex)) +
@@ -231,6 +233,14 @@ ggplot(mims_merge, aes(x = education, y = age, fill = sex)) +
        fill = "Sex")
 
 ```
+
+This figure shows the distribution of men and women in each eduation category. 
+
+The median age for participants with an education level `Less Than High School` is around 60 for men, and around 61 for women.
+
+The median age for participants with an education level `High school equivalent` is around 50 for men, and around 62 for women. 
+
+The median age for participants with an education level `More than high school` is around 43 for men, and 41 for women. 
 
 ```{r p3 task 3}
 
@@ -249,6 +259,8 @@ ggplot(total_mims, aes(x = age, y = total_activity, color = sex)) +
        ) 
 
 ```
+
+This figure shows the total activity over the day by education level and age. Overall, there's a decreasing trend of total daily activity across age. However, the dereasing is less significant as the education level increases. The differences between sex is not significant. 
 
 ```{r p3 task 4}
 daily_activity = mims_pivot |>
@@ -269,3 +281,4 @@ ggplot(daily_activity, aes(x = min_number, y = avg_activity, color = sex)) +
 
 ```
 
+This figure shows the average daily activity by education level and age. Overall, the average activity decreases at the begining, then suddenly increases till the noon, and then droppped back. There's no significant differences across education level. The population with `Less than high school` education level shows highest peak performance, and the population with `High School Equivalent` education level shows the lowest peak performance. Generally, female exhibit a little higher average daily activity compared to male. 
