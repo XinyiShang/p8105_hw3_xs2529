@@ -261,7 +261,7 @@ ggplot(total_mims, aes(x = age, y = total_activity, color = sex)) +
 
 ```
 
-This figure shows the total activity over the day by education level and age. Overall, there's a decreasing trend of total daily activity across age. However, the dereasing is less significant as the education level increases. The differences between sex is not significant. 
+This figure shows the total activity over the day by education level and age. Overall, there's a decreasing trend of total daily activity across age. However, the decreasing is less significant as the education level increases. The differences between sex is not significant. 
 
 ```{r p3 task 4}
 daily_activity = mims_pivot |>
