@@ -1,6 +1,7 @@
 ---
 title: "p8105_hw3_xs2529"
-output: html_document
+author: "Xinyi Shang"
+output: github_document
 date: "2023-10-15"
 ---
 
